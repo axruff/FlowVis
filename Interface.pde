@@ -15,7 +15,7 @@ void makeVectorVisControls(ControlP5 control)
   control.addSlider("scale", 0.5, 20, scale, sliderStep, sliderStep, 100, 15);//.setWindow(controlWindow);
   control.addSlider("step", 2, 20, step, sliderStep, 1 * sliderHeight + 2 * sliderStep, 100, 15);//.setWindow(controlWindow);
   control.addSlider("minVal", 0, 5, minVal, sliderStep, 2 * sliderHeight + 3 * sliderStep, 100, 15);//.setWindow(controlWindow);
-  control.addSlider("weight", 0.1, 3.0, weight, sliderStep, 3 * sliderHeight + 4 * sliderStep, 100, 15);//.setWindow(controlWindow);
+  control.addSlider("weight", 0.1, 5.0, weight, sliderStep, 3 * sliderHeight + 4 * sliderStep, 100, 15);//.setWindow(controlWindow);
   control.addSlider("bgblend", 0, 255, bgblend, sliderStep, 4 * sliderHeight + 5 * sliderStep, 100, 15);//.setWindow(controlWindow);
   control.addSlider("lutHue", 0, 360, lutHue, sliderStep, 5 * sliderHeight + 6 * sliderStep, 100, 15);//.setWindow(controlWindow);
   control.addSlider("flowScale", 0.05, 5, flowScale, sliderStep, 6 * sliderHeight + 7 * sliderStep, 100, 15);//.setWindow(controlWindow);

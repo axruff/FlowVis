@@ -86,7 +86,7 @@ int inputMode = 1;
 
 String pathVec = "c:\\Users\\fe0968\\Documents\\FlowVis\\data\\boom\\vec_pat\\";
 String pathImage = "c:\\Users\\fe0968\\Documents\\FlowVis\\data\\boom\\image\\";
-String pathMask = "c:\\Users\\fe0968\\Documents\\FlowVis\\data\\boom\\mask\\";
+String pathMask = "c:\\Users\\fe0968\\Documents\\FlowVis\\data\\boom\\mask_pat\\";
 String pathOutput = "c:\\Users\\fe0968\\Documents\\FlowVis\\data\\boom\\output\\";
 
 // Melting results processing
@@ -248,6 +248,18 @@ void draw()
   
   drawVectors();
   //drawTracks();
+  
+  if (modeMasking == 1 || modeMasking == 2) {
+    
+    noFill();
+    if (modeMasking == 1)
+      stroke(0);
+    else
+      stroke(255);
+      
+    ellipseMode(CENTER);
+    ellipse(mouseX , mouseY , 2*(float)maskRadius*vec_scale, 2*(float)maskRadius*vec_scale);
+  }
 
 }
 
@@ -285,15 +297,23 @@ void drawVectors()
   // Handle keyboard shortcuts
   if (keyPressed) {
     if (key == CODED) {
-      if (keyCode == UP) {       
+      if (keyCode == RIGHT) {       
  
         if (currentFrame < endIndexVec - startIndexVec) {
-          println("2");
           
           load(currentFrame);
           currentFrame=currentFrame+1;
         }
-     }
+      }
+      
+      if (keyCode == LEFT) {       
+ 
+        if (currentFrame > 0) {
+          
+          load(currentFrame);
+          currentFrame=currentFrame-1;
+        }
+      }
         
      
     }
@@ -305,8 +325,16 @@ void drawVectors()
         case 's':         
           save("result_image.png");
           break;
-        case 'x':         
-          runProcessing = true;
+        case 'r':         
+          //runProcessing = true;
+          //break;
+        case '[':         
+          maskRadius = maskRadius - 1;
+          controlP5.update();
+          break;
+        case ']':         
+          maskRadius = maskRadius + 1;
+          controlP5.update();
           break;
         // Experimental  
         case 'a':         // Add Particle mode
@@ -315,26 +343,27 @@ void drawVectors()
           else
             modeAddParticle = 0;     
           break;
-        case 'm':         // Masking Erase mode
-          if (modeMasking == 0 || modeMasking == 2) {
+        case 'x':         // Masking Erase mode
+          if (modeMasking == 0) {
             modeMasking = 1;
             println("Masking: ERASE");
           }
           else {
-            modeMasking = 0; 
-           println("Masking: OFF"); 
-          }   
-          break;
-      case 'n':         // Masking Add mode
-          if (modeMasking == 0 || modeMasking == 1) {
-            modeMasking = 2;
-            println("Masking: ADD");
+            
+            if (modeMasking == 1) {
+              modeMasking = 2; 
+              println("Masking: ADD");        
+            }
+            else {
+            
+              modeMasking = 0;
+              println(""); 
+       
+            }
           }
-          else {
-            modeMasking = 0;
-            println("Masking: OFF");  
-          }   
+          delay(500);   
           break;
+      
       }
     }
  }
@@ -429,6 +458,8 @@ void drawTracks()
 //  }
   
 }
+
+
 
 // Does not work, check why!
 void drawVecInfo()
