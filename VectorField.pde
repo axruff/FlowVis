@@ -152,9 +152,10 @@ class VectorField
       }
     }
   }
+ 
   
   
-   void showFlowJitteredGrid(int offsetX, int offsetY) {
+   void showFlowJitteredGrid(int offsetX, int offsetY, int scale) {
      
     if (update) {
       updateGrid();
@@ -178,12 +179,12 @@ class VectorField
           continue;
         
         pushMatrix();
-        translate(j+offsetX, i+offsetY);
+        translate(j*scale+offsetX, i*scale+offsetY);
         
         if (fixed)
           data[i][j].normalize();
 
-        arrow(data[i][j].x,data[i][j].y);
+        arrow(data[i][j].x*scale,data[i][j].y*scale);
         //segment(data[i][j].x,data[i][j].y);
         //flowline2(data[i][j].x,data[i][j].y);
         
