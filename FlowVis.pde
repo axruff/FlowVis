@@ -20,7 +20,7 @@ int step = 5;
 // minimum amlitude value to be displayed
 float minVal = 0.0;
 // stroke weight
-float weight = 1.6;
+float weight = 3.0;
 // fixed length shapes (normalized), show onlz direction
 boolean fixed = false;
 // Masking brush radius
@@ -33,6 +33,7 @@ int lutHue = 30;
 
 // masking mode: 0 - off, 1 - Erase mode, 2 - Add mask mode
 int modeMasking = 0;
+boolean useMaskFiles = true;
 
 //------------------------
 // Particles visualization
@@ -186,15 +187,21 @@ void setupVectors()
   
   // Load vector field using masking mode
   vectors.readFromFile(pathVec + prefixVec + pad(currentFrame + startIndexVec, maskSizeVec) +".txt"); 
-  // Load backround image
-  backImage = loadImage(pathImage + prefixImage + pad(currentFrame + startIndexImage, maskSizeImage) +".png");
-  // Load mask
-  maskImage = loadImage(pathMask + prefixMask + pad(currentFrame + startIndexMask, maskSizeMask) +".png");
   
   imageW = vectors.nx;
   imageH = vectors.ny;
   
-  applyMask(vectors.nx, vectors.ny);
+  // Load backround image
+  backImage = loadImage(pathImage + prefixImage + pad(currentFrame + startIndexImage, maskSizeImage) +".png");
+  // Load mask
+  if (useMaskFiles) {
+    maskImage = loadImage(pathMask + prefixMask + pad(currentFrame + startIndexMask, maskSizeMask) +".png");
+    applyMask(vectors.nx, vectors.ny);
+  }
+  
+ 
+  
+  
   
   if (windowAdjusted == 1)
     size(imageW*vec_scale, imageH*vec_scale);
@@ -280,9 +287,9 @@ void drawVectors()
   vectors.showFlowJitteredGrid(controlOffsetX,controlOffsetY, vec_scale);
   
   // Blend background image with transparency
-  //tint(255, bgblend); 
-  //image(backImage, 0, 0);
-  //tint(255, 255);
+  tint(255, bgblend); 
+  image(backImage,controlOffsetX,controlOffsetY);
+  tint(255, 255);
   
   // Run particles rendering
   //particles.run();
@@ -336,7 +343,16 @@ void drawVectors()
           maskRadius = maskRadius + 1;
           controlP5.update();
           break;
-        // Experimental  
+        // Experimental 
+       
+       case 'b':
+         if (bgblend == 0)
+            bgblend = 200;
+         else
+           bgblend = 0;
+         delay(100);  
+         break;
+       
         case 'a':         // Add Particle mode
           if (modeAddParticle == 0)
             modeAddParticle = 1;
@@ -361,7 +377,7 @@ void drawVectors()
        
             }
           }
-          delay(500);   
+          delay(200);   
           break;
       
       }

@@ -121,11 +121,13 @@ public void load(int value) {
     
     //sliderFrame.setValue(value);
     
-    vectors.readFromFile(pathVec + prefixVec + pad(value + startIndexVec, maskSizeVec) +".txt");
-    backImage = loadImage(pathImage + prefixImage + pad(value + startIndexImage, maskSizeImage) +".png");
-    maskImage = loadImage(pathMask + prefixMask + pad(currentFrame + startIndexMask, maskSizeMask) +".png");
+    vectors.readFromFile(pathVec + prefixVec + pad(value + 1 + startIndexVec, maskSizeVec) +".txt");
+    backImage = loadImage(pathImage + prefixImage + pad(value + 1 + startIndexImage, maskSizeImage) +".png");
     
-    applyMask(vectors.nx, vectors.ny);
+    if (useMaskFiles) {
+      maskImage = loadImage(pathMask + prefixMask + pad(currentFrame + 1 + startIndexMask, maskSizeMask) +".png");
+      applyMask(vectors.nx, vectors.ny);
+    }
      
 }
 
