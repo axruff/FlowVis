@@ -12,15 +12,15 @@ int visMode = 1;
 //------------------------
 
 // vectors length scaling (for drawing only) 
-float scale = 3.0;
+float scale = 3.5;
 // max amplitude scale for color coding 
 float flowScale = 1.0;
 // vector field grid step
-int step = 8;
+int step = 5;
 // minimum amlitude value to be displayed
 float minVal = 0.0;
 // stroke weight
-float weight = 0.7;
+float weight = 1.6;
 // fixed length shapes (normalized), show onlz direction
 boolean fixed = false;
 // Masking brush radius
@@ -29,6 +29,7 @@ int maskRadius = 10;
 int bgblend = 0;
 // Look up table hue value
 int lutHue = 30;
+
 
 // masking mode: 0 - off, 1 - Erase mode, 2 - Add mask mode
 int modeMasking = 0;
@@ -83,8 +84,10 @@ boolean runProcessing = false;
 // Input mode. 1 - Single file, 2 - sequence using file masks
 int inputMode = 1;
 
-String path = "c:\\Users\\fe0968\\Google Drive\\Projects\\Processing\\FlowVis\\data\\boom\\";
-//String path = "/Users/aleksejersov/Google Drive/Projects/Processing/FlowVis/data/"; // Rubber Whale data set
+String pathVec = "c:\\Users\\fe0968\\Documents\\FlowVis\\data\\boom\\vec_pat\\";
+String pathImage = "c:\\Users\\fe0968\\Documents\\FlowVis\\data\\boom\\image\\";
+String pathMask = "c:\\Users\\fe0968\\Documents\\FlowVis\\data\\boom\\mask\\";
+String pathOutput = "c:\\Users\\fe0968\\Documents\\FlowVis\\data\\boom\\output\\";
 
 // Melting results processing
 //String pathVec = "/Users/aleksejersov/data/melting/vec_txt/";
@@ -92,14 +95,14 @@ String path = "c:\\Users\\fe0968\\Google Drive\\Projects\\Processing\\FlowVis\\d
 //String pathOutput = "/Volumes/Transcend/DATA/melting/Output/ecap_05_520C/2012_05_24/viz/";
 
 // Tracking results processing
-String pathVec = "/Users/aleksejersov/data/melting/vec_txt/";
-String pathImage = "/Users/aleksejersov/mac_data/simulated/radios_png/";
-String pathOutput = "/Volumes/Transcend/DATA/melting/Output/ecap_05_520C/2012_05_24/viz/";
+//String pathVec = "/Users/aleksejersov/data/melting/vec_txt/";
+//String pathImage = "/Users/aleksejersov/mac_data/simulated/radios_png/";
+//String pathOutput = "/Volumes/Transcend/DATA/melting/Output/ecap_05_520C/2012_05_24/viz/";
 
 
-int startIndexVec = 1;
-int endIndexVec = 699;
-int maskSizeVec = 3;
+int startIndexVec = 0;
+int endIndexVec = 77;
+int maskSizeVec = 2;
 String prefixVec = "vec_";
 
 //int startIndexImage = 0;
@@ -108,9 +111,14 @@ String prefixVec = "vec_";
 //String prefixImage = "ecap";
 
 int startIndexImage = 0;
-int endIndexImage = 180;
-int maskSizeImage = 4;
-String prefixImage = "radios";
+int endIndexImage = 77;
+int maskSizeImage = 3;
+String prefixImage = "frame";
+
+int startIndexMask = 0;
+int endIndexMask = 77;
+int maskSizeMask = 3;
+String prefixMask = "mask";
 
 int currentFrame = 0;
 
@@ -123,6 +131,10 @@ VectorField vectors = new VectorField();
 ParticleSystem particles;
 // Temporal vector
 PVector vec; 
+
+PImage maskImage;
+
+int vec_scale = 4;
 
 //-----------------------------------------------
 // Tracker parameters
@@ -151,8 +163,9 @@ void setupVectors()
   // Ruberwhale example
   
   // Burst sequence
-  vectors.readFromFile(path + "vec_5.txt");
-  backImage = loadImage(path + "image_boom0005.png");
+  //vectors.readFromFile(pathVec + "vec_0.txt");
+  //backImage = loadImage(pathImage + "image_boom0000_scale4.png");
+  //maskImage = loadImage(pathMask + "mask.png");
   
   // Embryou Neural crest cells
   //vectors.readFromFile(path + "vec_slice_0090.txt");
@@ -172,23 +185,28 @@ void setupVectors()
   
   
   // Load vector field using masking mode
-  //vectors.readFromFile(pathVec + prefixVec + pad(currentFrame + startIndexVec, maskSizeVec) +".txt"); 
+  vectors.readFromFile(pathVec + prefixVec + pad(currentFrame + startIndexVec, maskSizeVec) +".txt"); 
   // Load backround image
-  //backImage = loadImage(pathImage + prefixImage + pad(currentFrame + startIndexImage, maskSizeImage) +".png");
+  backImage = loadImage(pathImage + prefixImage + pad(currentFrame + startIndexImage, maskSizeImage) +".png");
+  // Load mask
+  maskImage = loadImage(pathMask + prefixMask + pad(currentFrame + startIndexMask, maskSizeMask) +".png");
   
   imageW = vectors.nx;
   imageH = vectors.ny;
   
+  applyMask(vectors.nx, vectors.ny);
+  
   if (windowAdjusted == 1)
-    size(imageW, imageH);
+    size(imageW*vec_scale, imageH*vec_scale);
   else {
-    size(controlOffsetX+imageW + 100,controlOffsetY+imageH + 100);
+    size(controlOffsetX+imageW*vec_scale + 100,controlOffsetY+imageH*vec_scale + 100);
   }
   
   // Setup particles system  
   //initParticles(0);
   
   makeVectorVisControls(controlP5); 
+  
   
 }
 
@@ -200,7 +218,7 @@ void setupTracks()
   step = 4;
   
   // Simulated flow test
-  tracks.readFromFile(path + "tracks_output.txt");
+  tracks.readFromFile(pathImage + "tracks_output.txt");
   //backImage = loadImage("radio_000000.png");
   
   // Load vector field using masking mode
@@ -247,7 +265,7 @@ void drawVectors()
   
   // Show vector field
   //vectors.showFlowGrid(controlOffsetX,controlOffsetY);
-  vectors.showFlowJitteredGrid(controlOffsetX,controlOffsetY);
+  vectors.showFlowJitteredGrid(controlOffsetX,controlOffsetY, vec_scale);
   
   // Blend background image with transparency
   //tint(255, bgblend); 
@@ -266,37 +284,61 @@ void drawVectors()
   
   // Handle keyboard shortcuts
   if (keyPressed) {
-    switch (key) {
-      case ' ':         
-        initParticles(particleParam);
-        break;
-      case 's':         
-        save("result_image.png");
-        break;
-      case 'x':         
-        runProcessing = true;
-        break;
-      // Experimental  
-      case 'a':         // Add Particle mode
-        if (modeAddParticle == 0)
-          modeAddParticle = 1;
-        else
-          modeAddParticle = 0;     
-        break;
-      case 'm':         // Masking Erase mode
-        if (modeMasking == 0 || modeMasking == 2)
-          modeMasking = 1;
-        else
-          modeMasking = 0;     
-        break;
-    case 'n':         // Masking Add mode
-        if (modeMasking == 0 || modeMasking == 1)
-          modeMasking = 2;
-        else
-          modeMasking = 0;     
-        break;
+    if (key == CODED) {
+      if (keyCode == UP) {       
+ 
+        if (currentFrame < endIndexVec - startIndexVec) {
+          println("2");
+          
+          load(currentFrame);
+          currentFrame=currentFrame+1;
+        }
+     }
+        
+     
     }
-  }
+    else {
+      switch (key) {
+        case ' ':         
+          initParticles(particleParam);
+          break;
+        case 's':         
+          save("result_image.png");
+          break;
+        case 'x':         
+          runProcessing = true;
+          break;
+        // Experimental  
+        case 'a':         // Add Particle mode
+          if (modeAddParticle == 0)
+            modeAddParticle = 1;
+          else
+            modeAddParticle = 0;     
+          break;
+        case 'm':         // Masking Erase mode
+          if (modeMasking == 0 || modeMasking == 2) {
+            modeMasking = 1;
+            println("Masking: ERASE");
+          }
+          else {
+            modeMasking = 0; 
+           println("Masking: OFF"); 
+          }   
+          break;
+      case 'n':         // Masking Add mode
+          if (modeMasking == 0 || modeMasking == 1) {
+            modeMasking = 2;
+            println("Masking: ADD");
+          }
+          else {
+            modeMasking = 0;
+            println("Masking: OFF");  
+          }   
+          break;
+      }
+    }
+ }
+  
   
   if (runProcessing) {
     if ((frameCount % 120 == 0) &&  (currentFrame < endIndexVec - startIndexVec)) {
@@ -306,6 +348,26 @@ void drawVectors()
       
   }
   
+}
+
+void applyMask(int w, int h)
+{
+  for (int i=0; i<h; i++) {
+      for (int j=0; j<w; j++) { 
+        float val = red(maskImage.get(j,i));
+        
+        if (val == 255.0) {
+           vectors.masks[i][j] = 0; 
+    
+        }
+        else {
+          vectors.masks[i][j] = 1; 
+        }      
+      }
+  }
+  
+  
+  //println(red(maskImage.get(112,139)));
 }
 
 void drawTracks() 
@@ -394,10 +456,12 @@ void mouseClicked() {
 void mouseDragged() {
   // Masking Erase Mode
   if(modeMasking==1 && mousePressed) { 
-    drawMask(mouseX-controlOffsetX, mouseY-controlOffsetY, 1);
+    //drawMask((mouseX-controlOffsetX)*vec_scale, (mouseY-controlOffsetY)*vec_scale, 1);
+    drawMask(mouseX, mouseY, controlOffsetX, controlOffsetY, vec_scale, 1);
   }  
   // Masking Add Mode
   if(modeMasking==2 && mousePressed) {
-    drawMask(mouseX-controlOffsetX, mouseY-controlOffsetY, 0);
+    //drawMask((mouseX-controlOffsetX)*vec_scale, (mouseY-controlOffsetY)*vec_scale, 0);
+    drawMask(mouseX, mouseY, controlOffsetX, controlOffsetY, vec_scale, 0);
   }
 }
