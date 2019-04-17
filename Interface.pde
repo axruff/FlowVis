@@ -19,11 +19,14 @@ void makeVectorVisControls(ControlP5 control)
   control.addSlider("bgblend", 0, 255, bgblend, sliderStep, 4 * sliderHeight + 5 * sliderStep, 100, 15);//.setWindow(controlWindow);
   control.addSlider("lutHue", 0, 360, lutHue, sliderStep, 5 * sliderHeight + 6 * sliderStep, 100, 15);//.setWindow(controlWindow);
   control.addSlider("flowScale", 0.05, 5, flowScale, sliderStep, 6 * sliderHeight + 7 * sliderStep, 100, 15);//.setWindow(controlWindow);
+  control.addSlider("maskRadius", 1, 30, maskRadius, sliderStep, 7 * sliderHeight + 8 * sliderStep, 100, 15);//.setWindow(controlWindow);
+  
+  
   //sliderFrame = control.addSlider("currentFrame", 0, endIndexVec - startIndexVec + 1, currentFrame, sliderStep, 7 * sliderHeight + 8 * sliderStep, 100, 15);
-  sliderFrame = control.addSlider("currentFrame", 0, endIndexImage - startIndexImage + 1, currentFrame, sliderStep, 7 * sliderHeight + 8 * sliderStep, 100, 15);
+  sliderFrame = control.addSlider("currentFrame", 0, endIndexImage - startIndexImage + 1, currentFrame, sliderStep, 8 * sliderHeight + 9 * sliderStep, 100, 15);
   //sliderFrame.setWindow(controlWindow);
   
-  txtVectorInfo = control.addTextlabel("txtVecInfo").setText("X:0 Y:0 A:0").setPosition(width - 140, 10);
+  //txtVectorInfo = control.addTextlabel("txtVecInfo").setText("X:0 Y:0 A:0").setPosition(width - 140, 10);
   //txtVectorInfo.setWindow(controlWindow);
   
   // create a new button with name 'buttonA'
@@ -31,16 +34,20 @@ void makeVectorVisControls(ControlP5 control)
   
 }
 
-void drawMask(int x, int y, int value)
+void drawMask(int mx, int my, int offsetX, int offsetY, int scale, int value)
+//void drawMask(int x, int y, int value)
 {
   //println(width);
   //println(height);
   //println(controlOffsetX);
   
-  println(x);
+  //println(x);
   //println(y);
-  println(width -controlOffsetX - maskRadius-1);
-  println("");
+  //println(width -controlOffsetX - maskRadius-1);
+  //println("");
+  
+  int x = int((mx - offsetX) / scale);
+  int y = int((my - offsetY) / scale);
   
   if (x > maskRadius+1 && y > maskRadius+1 && x < imageW - maskRadius-1 && y < imageH - maskRadius-1) {
     for (int i=y-maskRadius; i<y+maskRadius; i++) {
@@ -48,9 +55,9 @@ void drawMask(int x, int y, int value)
           vectors.masks[i][j] = value;
       }
     }
-  }
-  
+  } 
 }
+
 
 void controlEvent(ControlEvent theEvent) {
   if (theEvent.isFrom(controlP5.getController("step"))) {
@@ -116,6 +123,9 @@ public void load(int value) {
     
     vectors.readFromFile(pathVec + prefixVec + pad(value + startIndexVec, maskSizeVec) +".txt");
     backImage = loadImage(pathImage + prefixImage + pad(value + startIndexImage, maskSizeImage) +".png");
+    maskImage = loadImage(pathMask + prefixMask + pad(currentFrame + startIndexMask, maskSizeMask) +".png");
+    
+    applyMask(vectors.nx, vectors.ny);
      
 }
 
